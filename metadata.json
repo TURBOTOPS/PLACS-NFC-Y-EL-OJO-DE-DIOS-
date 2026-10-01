@@ -1,0 +1,6 @@
+{
+  "name": "Atlas Automatizaciones - Placas NFC Google Reviews",
+  "description": "Consigue más reseñas en Google y posiciona tu negocio en los primeros lugares con las placas inteligentes NFC de Atlas Automatizaciones. Envíos a todo Chile.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
