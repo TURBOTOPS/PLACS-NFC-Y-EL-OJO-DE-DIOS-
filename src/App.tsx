@@ -17,6 +17,7 @@ import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import OrderModal from './components/OrderModal';
 import GoogleLinkGuideModal from './components/GoogleLinkGuideModal';
+import ImageManagerModal from './components/ImageManagerModal';
 import GodsEyeConsole from './components/GodsEyeView/GodsEyeConsole';
 import { ProductImageProvider } from './context/ProductImageContext';
 
@@ -129,6 +130,9 @@ export default function App() {
           isOpen={isLinkGuideOpen}
           onClose={() => setIsLinkGuideOpen(false)}
         />
+
+        {/* Secret Image Manager Modal */}
+        <ImageManagerModal />
       </div>
     </ProductImageProvider>
   );

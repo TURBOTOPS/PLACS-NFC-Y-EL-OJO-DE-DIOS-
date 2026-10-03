@@ -9,7 +9,7 @@ interface HeroProps {
 }
 
 export default function Hero({ onOpenOrderModal, onScrollToSimulator, onOpenGodsEye }: HeroProps) {
-  const { imageSrc } = useProductImage();
+  const { imageSrc, allImages, selectedId, setSelectedId, activeImage, openManagerModal } = useProductImage();
 
   return (
     <section className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24">
@@ -124,10 +124,14 @@ export default function Hero({ onOpenOrderModal, onScrollToSimulator, onOpenGods
             </div>
           </div>
 
-          {/* Right Column: The Exact Real Image from Studio */}
+          {/* Right Column: The Exact Real Images from Studio */}
           <div className="lg:col-span-5 relative flex flex-col items-center">
             {/* The Real Studio Photo Box - Dark Seamless Container */}
-            <div className="relative w-full max-w-sm rounded-3xl overflow-hidden border border-neutral-800 bg-black shadow-[0_0_50px_rgba(0,0,0,0.85)] group">
+            <div
+              onDoubleClick={openManagerModal}
+              className="relative w-full max-w-sm rounded-3xl overflow-hidden border border-neutral-800 bg-black shadow-[0_0_50px_rgba(0,0,0,0.85)] group cursor-pointer"
+              title="Doble clic para gestionar imágenes"
+            >
               <div className="relative aspect-[3/4] w-full bg-black overflow-hidden flex items-center justify-center">
                 <img
                   src={imageSrc}
@@ -135,27 +139,51 @@ export default function Hero({ onOpenOrderModal, onScrollToSimulator, onOpenGods
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
                 />
+
                 {/* Subtle dark ambient inner ring */}
                 <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-t-3xl pointer-events-none" />
               </div>
 
               {/* Caption */}
-              <div className="p-4 bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800/80 text-neutral-200 flex items-center justify-between text-xs">
+              <div className="p-3.5 bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800/80 text-neutral-200 flex items-center justify-between text-xs">
                 <div>
                   <span className="font-bold text-cyan-400 block uppercase tracking-wider text-[11px]">
-                    Fotografía Real del Producto
+                    {activeImage?.title || 'Fotografía Oficial'}
                   </span>
-                  <span className="text-neutral-400 text-[11px]">
+                  <span className="text-neutral-400 text-[10px]">
                     14cm alto · 12cm ancho · 5cm base
                   </span>
                 </div>
-                <span className="text-emerald-400 font-mono font-bold text-[11px] bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-1 rounded-lg">
+                <span className="text-emerald-400 font-mono font-bold text-[10px] bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-1 rounded-lg">
                   Modelo Oficial
                 </span>
               </div>
             </div>
 
-            <div className="mt-3 text-center text-xs text-neutral-400 flex items-center justify-center gap-2">
+            {/* Thumbnail View Switcher between both exact images */}
+            <div className="flex flex-wrap items-center gap-2 mt-3 w-full max-w-sm justify-center">
+              {allImages.map((img, idx) => (
+                <button
+                  key={img.id}
+                  onClick={() => setSelectedId(img.id)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all cursor-pointer ${
+                    selectedId === img.id
+                      ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(0,163,255,0.3)]'
+                      : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
+                  }`}
+                >
+                  <img
+                    src={img.src}
+                    alt={img.title}
+                    referrerPolicy="no-referrer"
+                    className="w-5 h-5 rounded-md object-cover border border-white/20"
+                  />
+                  <span className="truncate max-w-[120px]">{img.title}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-2 text-center text-xs text-neutral-400 flex items-center justify-center gap-2">
               <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
               <span>Acrílico con canto transparente y pie inclinado</span>
             </div>

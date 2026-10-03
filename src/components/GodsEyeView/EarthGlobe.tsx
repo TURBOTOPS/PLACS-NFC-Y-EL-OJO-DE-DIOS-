@@ -190,26 +190,35 @@ export default function EarthGlobe({
     scene.add(earthGroup);
     earthGroupRef.current = earthGroup;
 
-    // 6. Texture Loader for Real NASA Imagery
+    // 6. Texture Loader for Real 4K NASA Blue Marble Imagery
     const textureLoader = new THREE.TextureLoader();
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
 
     const earthDayMap = textureLoader.load('/textures/earth_day.jpg');
-    const earthNormalMap = textureLoader.load('/textures/earth_normal.jpg');
-    const earthSpecularMap = textureLoader.load('/textures/earth_specular.jpg');
-
     earthDayMap.colorSpace = THREE.SRGBColorSpace;
     earthDayMap.minFilter = THREE.LinearMipmapLinearFilter;
     earthDayMap.magFilter = THREE.LinearFilter;
+    earthDayMap.anisotropy = maxAnisotropy;
 
-    // Earth Sphere Surface
-    const earthGeo = new THREE.SphereGeometry(EARTH_RADIUS, 128, 128);
+    const earthBumpMap = textureLoader.load('/textures/earth_bump.jpg');
+    earthBumpMap.minFilter = THREE.LinearMipmapLinearFilter;
+    earthBumpMap.magFilter = THREE.LinearFilter;
+    earthBumpMap.anisotropy = maxAnisotropy;
+
+    const earthSpecularMap = textureLoader.load('/textures/earth_specular.png');
+    earthSpecularMap.minFilter = THREE.LinearMipmapLinearFilter;
+    earthSpecularMap.magFilter = THREE.LinearFilter;
+    earthSpecularMap.anisotropy = maxAnisotropy;
+
+    // Earth Sphere Surface - 160 segments for silky smooth curvature without polygon facets
+    const earthGeo = new THREE.SphereGeometry(EARTH_RADIUS, 160, 160);
     const earthMat = new THREE.MeshStandardMaterial({
       map: earthDayMap,
-      normalMap: earthNormalMap,
-      normalScale: new THREE.Vector2(0.85, 0.85),
+      bumpMap: earthBumpMap,
+      bumpScale: 0.035,
       roughnessMap: earthSpecularMap,
       roughness: 0.65,
-      metalness: 0.12,
+      metalness: 0.08,
     });
     const earthMesh = new THREE.Mesh(earthGeo, earthMat);
     earthGroup.add(earthMesh);
@@ -318,17 +327,20 @@ export default function EarthGlobe({
 
         vec3 sphereCoord = normalize(vWorldPosition);
 
-        vec3 drift1 = vec3(uTime * 0.007, 0.0, uTime * 0.0035);
-        vec3 drift2 = vec3(-uTime * 0.004, uTime * 0.0018, -uTime * 0.0025);
+        // Gentle continuous atmospheric drift synchronized with planetary rotation
+        vec3 drift1 = vec3(uTime * 0.0018, 0.0, uTime * 0.0009);
+        vec3 drift2 = vec3(-uTime * 0.0009, uTime * 0.0004, -uTime * 0.0006);
 
-        float n1 = fbm(sphereCoord * 3.4 + drift1);
-        float n2 = fbm(sphereCoord * 6.8 + drift2);
+        float n1 = fbm(sphereCoord * 3.2 + drift1);
+        float n2 = fbm(sphereCoord * 6.5 + drift2);
         float cloudDensity = n1 * 0.72 + n2 * 0.35;
 
-        float alpha = smoothstep(0.05, 0.52, cloudDensity);
+        // Smooth non-linear density falloff without sudden pop-in
+        float alpha = smoothstep(0.04, 0.50, cloudDensity);
 
-        float sunSample = fbm((sphereCoord + sunDir * 0.05) * 3.4 + drift1);
-        float selfShadow = clamp(1.0 - (sunSample - n1) * 1.6, 0.45, 1.0);
+        // Volumetric self-shadowing towards sun vector
+        float sunSample = fbm((sphereCoord + sunDir * 0.05) * 3.2 + drift1);
+        float selfShadow = clamp(1.0 - (sunSample - n1) * 1.5, 0.5, 1.0);
 
         float NdotL = dot(norm, sunDir);
         float dayFactor = smoothstep(-0.25, 0.38, NdotL);
@@ -341,10 +353,8 @@ export default function EarthGlobe({
         vec3 finalColor = mix(nightAmbient, litColor * selfShadow, dayFactor);
 
         float fresnel = 1.0 - max(dot(norm, viewDir), 0.0);
-        float limbAlpha = pow(fresnel, 2.4) * 0.35;
-        float totalAlpha = clamp(alpha * 0.75 + limbAlpha * (alpha + 0.1), 0.0, 0.85);
-
-        if (totalAlpha < 0.015) discard;
+        float limbAlpha = pow(fresnel, 2.4) * 0.32;
+        float totalAlpha = clamp(alpha * 0.72 + limbAlpha * (alpha + 0.08), 0.0, 0.82);
 
         gl_FragColor = vec4(finalColor, totalAlpha);
       }
@@ -724,9 +734,9 @@ export default function EarthGlobe({
       };
       mesh.userData = { type: 'earthquake', data: eqData };
 
-      // Invisible larger click target
+      // Precision click target
       const hitBox = new THREE.Mesh(
-        new THREE.SphereGeometry(radius * 2.2, 12, 12),
+        new THREE.SphereGeometry(radius * 1.3, 12, 12),
         new THREE.MeshBasicMaterial({ visible: false })
       );
       hitBox.position.copy(pos);
@@ -787,9 +797,9 @@ export default function EarthGlobe({
     panel.position.copy(issPos);
     panel.userData = { type: 'satellite', data: issData };
 
-    // Generous Click HitBox for ISS
+    // Targeted Click HitBox for ISS
     const issHitBox = new THREE.Mesh(
-      new THREE.SphereGeometry(0.55, 12, 12),
+      new THREE.SphereGeometry(0.32, 12, 12),
       new THREE.MeshBasicMaterial({ visible: false })
     );
     issHitBox.position.copy(issPos);
@@ -844,9 +854,9 @@ export default function EarthGlobe({
       };
       satMesh.userData = { type: 'satellite', data: satData };
 
-      // Generous HitBox so satellites are easily clickable
+      // Targeted HitBox so satellites are easily clickable
       const hitBox = new THREE.Mesh(
-        new THREE.SphereGeometry(0.48, 12, 12),
+        new THREE.SphereGeometry(0.26, 12, 12),
         new THREE.MeshBasicMaterial({ visible: false })
       );
       hitBox.position.copy(satPos);
@@ -896,7 +906,7 @@ export default function EarthGlobe({
       cone.userData = { type: 'flight', data: flightData };
 
       const hitBox = new THREE.Mesh(
-        new THREE.SphereGeometry(0.4, 12, 12),
+        new THREE.SphereGeometry(0.24, 12, 12),
         new THREE.MeshBasicMaterial({ visible: false })
       );
       hitBox.position.copy(pos);
@@ -941,7 +951,7 @@ export default function EarthGlobe({
       shipMesh.userData = { type: 'ship', data: shipData };
 
       const hitBox = new THREE.Mesh(
-        new THREE.SphereGeometry(0.35, 12, 12),
+        new THREE.SphereGeometry(0.22, 12, 12),
         new THREE.MeshBasicMaterial({ visible: false })
       );
       hitBox.position.copy(pos);

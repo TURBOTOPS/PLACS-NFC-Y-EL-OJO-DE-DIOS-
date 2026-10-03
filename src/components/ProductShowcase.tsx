@@ -2,7 +2,7 @@ import { ShieldCheck, Cpu, Smartphone, Award, Truck, Layers, Ruler } from 'lucid
 import { useProductImage } from '../context/ProductImageContext';
 
 export default function ProductShowcase() {
-  const { imageSrc } = useProductImage();
+  const { imageSrc, allImages, selectedId, setSelectedId, activeImage, openManagerModal } = useProductImage();
   const specs = [
     {
       icon: Ruler,
@@ -47,8 +47,12 @@ export default function ProductShowcase() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-16">
         {/* Left Column: ONLY the real studio photo with dimensions */}
-        <div className="lg:col-span-5 flex justify-center">
-          <div className="relative w-full max-w-sm rounded-3xl overflow-hidden border border-neutral-800 bg-black shadow-[0_0_50px_rgba(0,0,0,0.85)] group">
+        <div className="lg:col-span-5 flex flex-col items-center">
+          <div
+            onDoubleClick={openManagerModal}
+            className="relative w-full max-w-sm rounded-3xl overflow-hidden border border-neutral-800 bg-black shadow-[0_0_50px_rgba(0,0,0,0.85)] group cursor-pointer"
+            title="Doble clic para gestionar imágenes"
+          >
             <div className="relative aspect-[3/4] w-full bg-black overflow-hidden flex items-center justify-center">
               <img
                 src={imageSrc}
@@ -56,13 +60,14 @@ export default function ProductShowcase() {
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
               />
+
               <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-t-3xl pointer-events-none" />
             </div>
 
             <div className="p-4 bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800/80 text-neutral-200 text-xs flex items-center justify-between">
               <div>
                 <span className="text-cyan-400 font-bold block uppercase tracking-wider text-[11px]">
-                  Foto Real de Estudio
+                  {activeImage?.title || 'Foto de la Placa'}
                 </span>
                 <span className="text-neutral-400 text-[11px]">
                   Modelo exclusivo en stock (14 × 12 × 5 cm)
@@ -72,6 +77,29 @@ export default function ProductShowcase() {
                 100% Original
               </span>
             </div>
+          </div>
+
+          {/* Thumbnail switcher between both uploaded images */}
+          <div className="flex flex-wrap items-center gap-2 mt-3 w-full max-w-sm justify-center">
+            {allImages.map((img, idx) => (
+              <button
+                key={img.id}
+                onClick={() => setSelectedId(img.id)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all cursor-pointer ${
+                  selectedId === img.id
+                    ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(0,163,255,0.3)]'
+                    : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
+                }`}
+              >
+                <img
+                  src={img.src}
+                  alt={img.title}
+                  referrerPolicy="no-referrer"
+                  className="w-5 h-5 rounded-md object-cover border border-white/20"
+                />
+                <span className="truncate max-w-[120px]">{img.title}</span>
+              </button>
+            ))}
           </div>
         </div>
 
