@@ -57,9 +57,11 @@ Ref: #ATLAS-${orderRef}
 
 📦 *DETALLE DEL PEDIDO:*
 - Cantidad: ${quantity} ${quantity === 1 ? 'unidad' : 'unidades'}
-- Tarifa: ${pricing.appliedTier.label} (${formatCLP(pricing.unitPrice)} c/u)
-- Total a Pagar: ${formatCLP(pricing.totalPrice)} CLP
-${pricing.savings > 0 ? `✨ Ahorro aplicado: ${formatCLP(pricing.savings)} CLP` : ''}
+- Tarifa: ${pricing.appliedTier.label} (${formatCLP(pricing.netUnitPrice)} + 19% de IVA c/u)
+- Subtotal Neto: ${formatCLP(pricing.netTotalPrice)} CLP
+- IVA (19%): ${formatCLP(pricing.ivaAmount)} CLP
+- Total Final a Pagar: ${formatCLP(pricing.totalPriceWithIva)} CLP (IVA incluido)
+${pricing.savings > 0 ? `✨ Ahorro aplicado: ${formatCLP(pricing.savings)} CLP con IVA` : ''}
 
 🔗 *Link / Ficha Google Maps:*
 ${formData.googleMapsLink || 'Solicito que Atlas busque mi local con la dirección proporcionada'}
@@ -170,7 +172,8 @@ Hola Atlas Automatizaciones, me gustaría concretar esta solicitud.`;
 
               <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto">
                 <div className="text-[11px] text-neutral-400">
-                  {formatCLP(pricing.unitPrice)} c/u
+                  <span className="text-white font-semibold">{formatCLP(pricing.netUnitPrice)} + 19% IVA</span> c/u
+                  <span className="text-neutral-500 ml-1">({formatCLP(pricing.unitPriceWithIva)} con IVA)</span>
                   {pricing.savings > 0 && (
                     <span className="text-emerald-400 ml-1.5 font-bold">
                       (Ahorras {formatCLP(pricing.savings)})
@@ -178,7 +181,10 @@ Hola Atlas Automatizaciones, me gustaría concretar esta solicitud.`;
                   )}
                 </div>
                 <div className="text-xl font-display font-extrabold text-cyan-400 tabular-nums">
-                  Total: {formatCLP(pricing.totalPrice)}
+                  Total: {formatCLP(pricing.totalPriceWithIva)}
+                </div>
+                <div className="text-[10px] text-neutral-400 font-mono">
+                  Neto: {formatCLP(pricing.netTotalPrice)} + IVA 19%: {formatCLP(pricing.ivaAmount)}
                 </div>
               </div>
             </div>

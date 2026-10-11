@@ -15,7 +15,7 @@ export default function PricingCalculator({ onOpenOrderModalWithQty }: PricingCa
     const p = calculateOrderPrice(qty);
     const msg = `Hola Atlas Automatizaciones! Quiero cotizar/comprar ${qty} ${
       qty === 1 ? 'Placa NFC Google Reviews' : 'Placas NFC Google Reviews'
-    } por un total de ${formatCLP(p.totalPrice)} (${formatCLP(p.unitPrice)} c/u). ¿Me podrían dar los detalles de pago y envío?`;
+    } a ${formatCLP(p.netUnitPrice)} + 19% de IVA c/u. Subtotal neto: ${formatCLP(p.netTotalPrice)} + IVA 19% (${formatCLP(p.ivaAmount)}) = Total a pagar: ${formatCLP(p.totalPriceWithIva)}. ¿Me podrían dar los detalles de pago y envío?`;
     const url = `https://wa.me/${ATLAS_CONTACT.whatsappRaw}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -23,7 +23,7 @@ export default function PricingCalculator({ onOpenOrderModalWithQty }: PricingCa
   const handleEmailDirect = (qty: number) => {
     const p = calculateOrderPrice(qty);
     const subject = `Cotización Placas NFC Google Reviews - ${qty} ${qty === 1 ? 'Unidad' : 'Unidades'}`;
-    const body = `Hola Atlas Automatizaciones,\n\nQuisiera solicitar cotización para la compra de ${qty} Placa(s) NFC Google Reviews.\n\nCantidad: ${qty} unidad(es)\nPrecio unitario: ${formatCLP(p.unitPrice)}\nTotal estimado: ${formatCLP(p.totalPrice)}\n\nFavor indicarme los pasos a seguir para enviar los datos de mi negocio y coordinar el despacho.\n\nSaludos!`;
+    const body = `Hola Atlas Automatizaciones,\n\nQuisiera solicitar cotización para la compra de ${qty} Placa(s) NFC Google Reviews.\n\nCantidad: ${qty} unidad(es)\nPrecio unitario neto: ${formatCLP(p.netUnitPrice)} + 19% de IVA (${formatCLP(p.unitPriceWithIva)} con IVA c/u)\nSubtotal Neto: ${formatCLP(p.netTotalPrice)}\nIVA (19%): ${formatCLP(p.ivaAmount)}\nTotal a pagar (IVA Incluido): ${formatCLP(p.totalPriceWithIva)}\n\nFavor indicarme los pasos a seguir para enviar los datos de mi negocio y coordinar el despacho.\n\nSaludos!`;
     const mailto = `mailto:${ATLAS_CONTACT.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
   };
@@ -40,7 +40,7 @@ export default function PricingCalculator({ onOpenOrderModalWithQty }: PricingCa
           Valores oficiales y descuentos por volumen
         </h2>
         <p className="text-base sm:text-lg text-neutral-400">
-          Elige la cantidad ideal para tus puntos de cobro, terrazas o sucursales. Mientras más placas equipes, mayor es tu ahorro por unidad.
+          Elige la cantidad ideal para tus puntos de cobro, terrazas o sucursales. Precios netos por unidad + 19% de IVA con factura o boleta electrónica.
         </p>
       </div>
 
@@ -79,11 +79,19 @@ export default function PricingCalculator({ onOpenOrderModalWithQty }: PricingCa
                 </div>
 
                 <div className="mb-6">
-                  <div className="text-4xl sm:text-5xl font-display font-black text-white tabular-nums tracking-tight">
-                    {formatCLP(tier.unitPrice)}
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="text-3xl sm:text-4xl font-display font-black text-white tabular-nums tracking-tight">
+                      {formatCLP(tier.unitPrice)}
+                    </span>
+                    <span className="text-xs sm:text-sm font-extrabold text-cyan-400 bg-cyan-950/90 border border-cyan-800/80 px-2 py-0.5 rounded-lg">
+                      + 19% de IVA
+                    </span>
                   </div>
-                  <div className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mt-1">
-                    Por Unidad
+                  <div className="text-xs text-neutral-400 mt-2 flex items-center justify-between font-medium">
+                    <span className="text-neutral-300">
+                      {formatCLP(Math.round(tier.unitPrice * 1.19))} con IVA incluido
+                    </span>
+                    <span className="text-neutral-500 font-mono text-[11px]">Por Unidad</span>
                   </div>
                 </div>
 
@@ -94,15 +102,11 @@ export default function PricingCalculator({ onOpenOrderModalWithQty }: PricingCa
                   </li>
                   <li className="flex items-center gap-2.5">
                     <Check className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span>QR de respaldo de alta definición grabado</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-cyan-400 shrink-0" />
                     <span>Pre-programación gratuita con tu enlace</span>
                   </li>
                   <li className="flex items-center gap-2.5">
                     <Check className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span>Cero mensualidades · Pago único de por vida</span>
+                    <span>Cero mensualidades · Factura o Boleta emitida</span>
                   </li>
                 </ul>
               </div>
@@ -118,7 +122,7 @@ export default function PricingCalculator({ onOpenOrderModalWithQty }: PricingCa
                     : 'bg-neutral-800 hover:bg-neutral-700 text-white'
                 }`}
               >
-                <span>Seleccionar {tier.label}</span>
+                <span>Seleccionar {tier.label} ({formatCLP(tier.unitPrice)} + IVA)</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -188,10 +192,11 @@ export default function PricingCalculator({ onOpenOrderModalWithQty }: PricingCa
               <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
               <span>
                 Tarifa aplicada: <strong className="text-white">{pricing.appliedTier.label}</strong> a{' '}
-                <strong className="text-cyan-400">{formatCLP(pricing.unitPrice)}</strong> por unidad.
+                <strong className="text-cyan-400">{formatCLP(pricing.netUnitPrice)} + 19% de IVA</strong> por unidad
+                ({formatCLP(pricing.unitPriceWithIva)} con IVA c/u).
                 {pricing.savings > 0 && (
                   <span className="text-emerald-400 ml-1">
-                    (Estás ahorrando {formatCLP(pricing.savings)})
+                    (Estás ahorrando {formatCLP(pricing.savings)} con IVA)
                   </span>
                 )}
               </span>
@@ -201,21 +206,30 @@ export default function PricingCalculator({ onOpenOrderModalWithQty }: PricingCa
           {/* Summary and Direct Purchase Actions */}
           <div className="lg:col-span-5 bg-neutral-950 p-6 sm:p-7 rounded-2xl border border-neutral-800 flex flex-col justify-between">
             <div>
-              <div className="text-xs uppercase tracking-wider text-neutral-400 font-bold mb-3">
-                Resumen de tu Cotización
+              <div className="text-xs uppercase tracking-wider text-neutral-400 font-bold mb-3 flex items-center justify-between">
+                <span>Resumen de tu Cotización</span>
+                <span className="text-[10px] text-cyan-400 font-mono bg-cyan-950/80 border border-cyan-800/80 px-2 py-0.5 rounded">
+                  IVA 19% DESGLOSADO
+                </span>
               </div>
               <div className="space-y-2 text-sm pb-4 border-b border-neutral-800">
                 <div className="flex justify-between text-neutral-300">
-                  <span>Placas ({selectedQty} {selectedQty === 1 ? 'unidad' : 'unidades'}):</span>
-                  <span className="tabular-nums font-mono">{formatCLP(pricing.totalPrice)}</span>
+                  <span>Subtotal Neto ({selectedQty} {selectedQty === 1 ? 'unidad' : 'unidades'}):</span>
+                  <span className="tabular-nums font-mono font-medium">{formatCLP(pricing.netTotalPrice)}</span>
+                </div>
+                <div className="flex justify-between text-cyan-400">
+                  <span className="flex items-center gap-1">
+                    <span>IVA (19%):</span>
+                  </span>
+                  <span className="tabular-nums font-mono font-semibold">+{formatCLP(pricing.ivaAmount)}</span>
                 </div>
                 <div className="flex justify-between text-neutral-300">
                   <span>Programación de chip NFC:</span>
                   <span className="text-emerald-400 font-semibold">GRATIS</span>
                 </div>
                 <div className="flex justify-between text-neutral-300">
-                  <span>Envíos:</span>
-                  <span className="text-cyan-400">Todo Chile</span>
+                  <span>Despacho a todo Chile:</span>
+                  <span className="text-neutral-400 text-xs">A coordinar</span>
                 </div>
                 {pricing.savings > 0 && (
                   <div className="flex justify-between text-emerald-400 font-medium">
@@ -225,11 +239,19 @@ export default function PricingCalculator({ onOpenOrderModalWithQty }: PricingCa
                 )}
               </div>
 
-              <div className="pt-4 mb-6 flex justify-between items-baseline">
-                <span className="text-base font-bold text-white">Total a pagar:</span>
-                <span className="text-3xl font-display font-extrabold text-cyan-400 tabular-nums">
-                  {formatCLP(pricing.totalPrice)}
-                </span>
+              <div className="pt-4 mb-6">
+                <div className="flex justify-between items-baseline">
+                  <div>
+                    <span className="text-base font-bold text-white block">Total a pagar:</span>
+                    <span className="text-[11px] text-neutral-400">IVA (19%) incluido</span>
+                  </div>
+                  <span className="text-3xl font-display font-extrabold text-cyan-400 tabular-nums">
+                    {formatCLP(pricing.totalPriceWithIva)}
+                  </span>
+                </div>
+                <div className="text-[11px] text-neutral-400 mt-1 text-right font-mono">
+                  {formatCLP(pricing.netTotalPrice)} neto + {formatCLP(pricing.ivaAmount)} IVA
+                </div>
               </div>
             </div>
 

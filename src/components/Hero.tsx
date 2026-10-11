@@ -204,27 +204,33 @@ export default function Hero({ onOpenOrderModal, onScrollToSimulator, onOpenGods
               <div className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">
                 1 Unidad
               </div>
-              <div className="text-3xl sm:text-4xl font-display font-black text-white tabular-nums mb-1">
+              <div className="text-3xl sm:text-4xl font-display font-black text-white tabular-nums">
                 $49.990
               </div>
-              <div className="text-xs font-semibold text-neutral-400 uppercase tracking-widest">
-                Por Unidad
+              <div className="text-xs font-bold text-cyan-400 mt-1 mb-1">
+                + 19% de IVA
+              </div>
+              <div className="text-[11px] font-semibold text-neutral-400 uppercase tracking-widest">
+                Por Unidad ($59.488 con IVA)
               </div>
             </div>
 
             {/* 2 Unidades */}
             <div className="rounded-2xl bg-gradient-to-b from-blue-950/40 via-neutral-900 to-neutral-900 border-2 border-cyan-400 p-6 flex flex-col items-center text-center shadow-[0_0_25px_rgba(0,163,255,0.25)] relative">
               <div className="absolute -top-3 px-3 py-0.5 bg-cyan-400 text-neutral-950 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
-                Ahorras $8.000
+                Ahorras $8.000 + IVA
               </div>
               <div className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">
                 2 Unidades
               </div>
-              <div className="text-3xl sm:text-4xl font-display font-black text-white tabular-nums mb-1">
+              <div className="text-3xl sm:text-4xl font-display font-black text-white tabular-nums">
                 $45.990
               </div>
-              <div className="text-xs font-semibold text-neutral-400 uppercase tracking-widest">
-                Por Unidad
+              <div className="text-xs font-bold text-cyan-400 mt-1 mb-1">
+                + 19% de IVA
+              </div>
+              <div className="text-[11px] font-semibold text-neutral-400 uppercase tracking-widest">
+                Por Unidad ($54.728 con IVA)
               </div>
             </div>
 
@@ -233,11 +239,14 @@ export default function Hero({ onOpenOrderModal, onScrollToSimulator, onOpenGods
               <div className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">
                 +3 Unidades
               </div>
-              <div className="text-3xl sm:text-4xl font-display font-black text-white tabular-nums mb-1">
+              <div className="text-3xl sm:text-4xl font-display font-black text-white tabular-nums">
                 $42.990
               </div>
-              <div className="text-xs font-semibold text-neutral-400 uppercase tracking-widest">
-                Por Unidad (Ahorras $21.000+)
+              <div className="text-xs font-bold text-cyan-400 mt-1 mb-1">
+                + 19% de IVA
+              </div>
+              <div className="text-[11px] font-semibold text-neutral-400 uppercase tracking-widest">
+                Por Unidad ($51.158 con IVA)
               </div>
             </div>
           </div>

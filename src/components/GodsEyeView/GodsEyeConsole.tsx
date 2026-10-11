@@ -36,24 +36,19 @@ import {
   Globe2,
   Terminal,
   HelpCircle,
-  AlertTriangle
+  AlertTriangle,
+  Newspaper
 } from 'lucide-react';
 import EarthGlobe, { Earthquake, SatellitePos, FlightItem, ShipItem } from './EarthGlobe';
 import { processAiCommand, CommandResult, GLOBAL_GEOCODER } from './aiCommandEngine';
+import GlobalMarketsTicker from './GlobalMarketsTicker';
+import WorldNewsDrawer from './WorldNewsDrawer';
+import LiveCctvConsole, { GLOBAL_CCTV_CAMERAS } from './LiveCctvConsole';
 
 interface GodsEyeConsoleProps {
   onBackToStore: () => void;
   onOpenOrderModal: () => void;
 }
-
-// Live CCTV / City Cameras Data
-const CITY_CAMERAS = [
-  { id: 'cam-scl', city: 'Santiago de Chile', title: 'Plaza Baquedano / Providencia', lat: -33.4372, lon: -70.6345, img: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80', status: 'EN VIVO' },
-  { id: 'cam-nyc', city: 'Nueva York, EE.UU.', title: 'Times Square / Midtown Manhattan', lat: 40.758, lon: -73.9855, img: 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=600&auto=format&fit=crop&q=80', status: 'EN VIVO' },
-  { id: 'cam-tyo', city: 'Tokio, Japón', title: 'Cruce de Shibuya / Tokyo Central', lat: 35.6595, lon: 139.7005, img: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=600&auto=format&fit=crop&q=80', status: 'EN VIVO' },
-  { id: 'cam-lon', city: 'Londres, Reino Unido', title: 'TfL JamCam / Tower Bridge', lat: 51.5055, lon: -0.0754, img: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600&auto=format&fit=crop&q=80', status: 'EN VIVO' },
-  { id: 'cam-par', city: 'París, Francia', title: 'Torre Eiffel / Champs de Mars', lat: 48.8584, lon: 2.2945, img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&auto=format&fit=crop&q=80', status: 'EN VIVO' },
-];
 
 export default function GodsEyeConsole({ onBackToStore, onOpenOrderModal }: GodsEyeConsoleProps) {
   // Layer toggles
@@ -98,7 +93,9 @@ export default function GodsEyeConsole({ onBackToStore, onOpenOrderModal }: Gods
   // Modals & Panels
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
-  const [isCctvDrawerOpen, setIsCctvDrawerOpen] = useState(false);
+  const [isCctvConsoleOpen, setIsCctvConsoleOpen] = useState(false);
+  const [selectedCctvId, setSelectedCctvId] = useState<string>('CAM-SCL-01');
+  const [isNewsDrawerOpen, setIsNewsDrawerOpen] = useState(false);
 
   // Search Bar input
   const [searchQuery, setSearchQuery] = useState('');
@@ -441,19 +438,36 @@ export default function GodsEyeConsole({ onBackToStore, onOpenOrderModal }: Gods
             <span className="hidden sm:inline">Info & API</span>
           </button>
 
-          {/* CCTV Cameras Toggle */}
+          {/* CCTV Cameras Live Surveillance Console Toggle */}
           <button
             onClick={() => {
-              setIsCctvDrawerOpen(!isCctvDrawerOpen);
+              setIsCctvConsoleOpen(true);
               playTacticalBeep(900, 'sine', 0.05);
             }}
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-colors ${
-              isCctvDrawerOpen ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300' : 'bg-neutral-900 border-neutral-700 text-neutral-300'
+              isCctvConsoleOpen ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300' : 'bg-neutral-900 border-neutral-700 text-neutral-300 hover:text-white'
             }`}
-            title="Cámaras Urbanas CCTV"
+            title="Centro de Vigilancia CCTV en Vivo (8 Cámaras Mundiales)"
           >
             <Video className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden xl:inline">Cámaras</span>
+            <span className="hidden xl:inline">Cámaras en Vivo</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+          </button>
+
+          {/* World News Toggle Button */}
+          <button
+            onClick={() => {
+              setIsNewsDrawerOpen(true);
+              playTacticalBeep(850, 'sine', 0.05);
+            }}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-colors ${
+              isNewsDrawerOpen ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300' : 'bg-neutral-900 border-neutral-700 text-neutral-300 hover:text-white'
+            }`}
+            title="Centro de Noticias Mundiales en Vivo"
+          >
+            <Newspaper className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="hidden sm:inline">Noticias</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
           </button>
 
           {/* Voice Speech Audio Output Toggle */}
@@ -499,12 +513,12 @@ export default function GodsEyeConsole({ onBackToStore, onOpenOrderModal }: Gods
             </span>
           </button>
 
-          {/* Direct CTA to Placas NFC ($49.990) */}
+          {/* Direct CTA to Placas NFC ($49.990 + 19% IVA) */}
           <button
             onClick={onBackToStore}
             className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-lg bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white shadow-[0_0_20px_rgba(0,163,255,0.4)] cursor-pointer transition-all active:scale-95"
           >
-            <span>Placas NFC ($49.990)</span>
+            <span>Placas NFC ($49.990 + 19% IVA)</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -526,6 +540,14 @@ export default function GodsEyeConsole({ onBackToStore, onOpenOrderModal }: Gods
           Pedir Placas para mi Negocio →
         </button>
       </div>
+
+      {/* GLOBAL FINANCIAL MARKETS & ASSETS TICKER BAR */}
+      <GlobalMarketsTicker
+        onFlyToLocation={(coords) => {
+          setTargetCoords({ lat: coords.lat, lon: coords.lon, zoom: 3 });
+        }}
+        onOpenNews={() => setIsNewsDrawerOpen(true)}
+      />
 
       {/* ========================================================================= */}
       {/* 2. 3D EARTH GLOBE VIEWPORT & FLOATING COCKPIT HUD                          */}
@@ -1109,6 +1131,26 @@ export default function GodsEyeConsole({ onBackToStore, onOpenOrderModal }: Gods
                 <span>Centrar en 3D</span>
               </button>
 
+              {/* CCTV Live Camera Button if available */}
+              {(selectedEntity.type === 'city' || selectedEntity.data?.id?.includes('ISS')) && (
+                <button
+                  onClick={() => {
+                    const match = GLOBAL_CCTV_CAMERAS.find(c =>
+                      selectedEntity.data?.name?.toLowerCase().includes(c.city.toLowerCase().split(' ')[0]) ||
+                      (selectedEntity.data?.id?.includes('ISS') && c.id === 'CAM-ISS-00')
+                    );
+                    if (match) setSelectedCctvId(match.id);
+                    setIsCctvConsoleOpen(true);
+                    playTacticalBeep(1100, 'sine', 0.08);
+                  }}
+                  className="py-2 px-3 text-xs font-bold text-cyan-300 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                  title="Ver Cámara CCTV en Vivo de esta ubicación"
+                >
+                  <Video className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Cámara</span>
+                </button>
+              )}
+
               {selectedEntity.type === 'satellite' && (
                 <button
                   onClick={() => {
@@ -1330,61 +1372,17 @@ export default function GodsEyeConsole({ onBackToStore, onOpenOrderModal }: Gods
       {/* ========================================================================= */}
       {/* 4. CCTV LIVE CAMERAS DRAWER                                               */}
       {/* ========================================================================= */}
-      {isCctvDrawerOpen && (
-        <div className="fixed inset-y-0 right-0 w-full sm:w-96 bg-neutral-950/95 backdrop-blur-xl border-l border-neutral-800 z-40 p-5 overflow-y-auto shadow-2xl flex flex-col">
-          <div className="flex items-center justify-between pb-4 border-b border-neutral-800 mb-4">
-            <div className="flex items-center gap-2">
-              <Video className="w-5 h-5 text-cyan-400" />
-              <h3 className="font-display font-bold text-base text-white">Cámaras Urbanas CCTV</h3>
-            </div>
-            <button
-              onClick={() => setIsCctvDrawerOpen(false)}
-              className="p-1.5 rounded-lg bg-neutral-900 text-neutral-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="space-y-4 flex-1">
-            {CITY_CAMERAS.map((cam) => (
-              <div
-                key={cam.id}
-                onClick={() => {
-                  setTargetCoords({ lat: cam.lat, lon: cam.lon, zoom: 13.5 });
-                  setFollowingEntity(null);
-                  setIsCctvDrawerOpen(false);
-                  playTacticalBeep(1100, 'sine', 0.08);
-                }}
-                className="rounded-2xl border border-neutral-800 overflow-hidden bg-neutral-900 hover:border-cyan-500/50 cursor-pointer transition-all group"
-              >
-                <div className="relative aspect-video w-full bg-black overflow-hidden">
-                  <img
-                    src={cam.img}
-                    alt={cam.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
-                  />
-                  <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/75 border border-red-500/50 text-[10px] font-bold text-red-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                    <span>{cam.status}</span>
-                  </div>
-                  <div className="absolute bottom-2 left-2 text-[10px] font-mono text-neutral-300 bg-black/70 px-2 py-0.5 rounded">
-                    {cam.city}
-                  </div>
-                </div>
-                <div className="p-3">
-                  <div className="text-xs font-semibold text-white group-hover:text-cyan-400 transition-colors">
-                    {cam.title}
-                  </div>
-                  <div className="text-[10px] text-neutral-400 mt-1 flex items-center justify-between">
-                    <span>{cam.lat}° N, {cam.lon}° E</span>
-                    <span className="text-cyan-400 font-bold">Enfocar 3D →</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* ========================================================================= */}
+      {/* 4. FULLY FUNCTIONAL LIVE CCTV SURVEILLANCE CONSOLE                        */}
+      {/* ========================================================================= */}
+      <LiveCctvConsole
+        isOpen={isCctvConsoleOpen}
+        onClose={() => setIsCctvConsoleOpen(false)}
+        onFlyToLocation={(coords) => {
+          setTargetCoords({ lat: coords.lat, lon: coords.lon, zoom: coords.zoom || 13.5 });
+        }}
+        initialCameraId={selectedCctvId}
+      />
 
       {/* ========================================================================= */}
       {/* 5. INFO & API KEY GUIDE MODAL (EXPLAINS HOW TO CONNECT KEYS & PERMISSIONS) */}
@@ -1565,6 +1563,15 @@ export default function GodsEyeConsole({ onBackToStore, onOpenOrderModal }: Gods
           </div>
         </div>
       )}
+
+      {/* WORLD NEWS INTELLIGENCE DRAWER */}
+      <WorldNewsDrawer
+        isOpen={isNewsDrawerOpen}
+        onClose={() => setIsNewsDrawerOpen(false)}
+        onFlyToLocation={(coords) => {
+          setTargetCoords({ lat: coords.lat, lon: coords.lon, zoom: coords.zoom || 3 });
+        }}
+      />
     </div>
   );
 }

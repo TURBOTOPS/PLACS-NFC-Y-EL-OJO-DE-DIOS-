@@ -1,4 +1,4 @@
-import { Eye, Smartphone } from 'lucide-react';
+import { Eye, Smartphone, Newspaper } from 'lucide-react';
 
 interface NavbarProps {
   onOpenOrderModal: () => void;
@@ -81,6 +81,19 @@ export default function Navbar({ onOpenOrderModal, currentView, onSelectView }: 
 
         {/* Zone 3: Primary Actions */}
         <div className="flex items-center gap-2.5">
+          {/* Quick World News & Intelligence button in Store view */}
+          {currentView === 'store' && (
+            <button
+              onClick={() => onSelectView('gods_eye')}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 hover:border-cyan-500/50 text-neutral-300 hover:text-cyan-300 transition-colors cursor-pointer"
+              title="Explorar Noticias y Mercados Mundiales en el Ojo de Dios 3D"
+            >
+              <Newspaper className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Noticias Mundiales</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+            </button>
+          )}
+
           {/* Mobile Ojo de Dios trigger */}
           <button
             onClick={() => onSelectView(currentView === 'store' ? 'gods_eye' : 'store')}

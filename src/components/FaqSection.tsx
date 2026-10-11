@@ -15,8 +15,8 @@ export default function FaqSection() {
       a: 'La placa contiene un microchip NFC pasivo integrado dentro del acrílico. Cuando un cliente acerca su teléfono inteligente (sin necesidad de tocarla físicamente ni apretar ningún botón), el celular lee la señal electromagnética inductiva y abre de forma inmediata tu perfil de Google Reviews con las 5 estrellas listas para enviar.',
     },
     {
-      q: '¿Qué pasa con los clientes que tienen celulares sin NFC?',
-      a: 'Cada placa incluye un código QR dinámico de alta resolución impreso y protegido en la cara frontal. Si alguien tiene un teléfono muy antiguo sin NFC, simplemente abre su cámara y escanea el código, llegando exactamente al mismo enlace directo de reseñas en 1 segundo.',
+      q: '¿Qué celulares son compatibles con la placa NFC?',
+      a: 'Prácticamente todos los smartphones modernos (iPhone XR/XS en adelante y los dispositivos Android con NFC desde 2017) cuentan con tecnología NFC nativa activada de fábrica. El cliente solo acerca su teléfono a la placa y se abre inmediatamente el enlace sin necesidad de instalar ninguna aplicación.',
     },
     {
       q: '¿Necesita estar enchufada, tener pilas o cargarse?',
